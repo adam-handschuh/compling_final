@@ -1,6 +1,3 @@
-"""
-Generate corpus based on member id, chamber debates, or specific panels within a date range
-"""
 from xml.dom import minidom
 import pandas as pd
 from pathlib import Path
@@ -8,16 +5,6 @@ import requests
 import argparse
 import os
 from datetime import datetime
-
-
-def get_age(date_of_birth, date_of_debate):
-    if '.' in date_of_birth:
-        date_of_birth = date_of_birth.split('.')[-1]
-    birth_date = datetime.strptime(date_of_birth, "%Y-%m-%d")
-    debate_date = datetime.strptime(date_of_debate, "%Y-%m-%d")
-    age = debate_date.year - birth_date.year - ((debate_date.month, debate_date.day) < (birth_date.month, birth_date.day))
-    return age
-
 
 def get_panel_members(panel_name, date_start):
     """Get list of members from a specific Seanad panel"""
