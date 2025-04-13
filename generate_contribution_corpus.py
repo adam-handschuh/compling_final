@@ -8,6 +8,46 @@ from datetime import datetime
 
 from scipy.stats import mannwhitneyu
 
+            # PIDs of Labour Panel
+            Labour_names = [
+                "#JerryButtimer", "#PatCasey", "#ShaneCassells", "#GerardPCraughwell",
+                "#JohnCummins", "#RobbieGallagher", "#PaulGavan", "#JoeOReilly",
+                "#PaulineOReilly", "#NedOSullivan", "#MarieSherlock", "#ChrisAndrews",
+                "#NessaCosgrove", "#MarkDuffy", "#MikeKennelly", "#MariaMcCormack",
+                "#MargaretMurphyOMahony", "#PatriciaStephenson", "#MáireDevine",
+                "#TerryLeyden", "#JenniferMurnaneOConnor", "#GedNash", "#NealeRichmond",
+                
+            ]
+            # PIDs of NUI panel
+            NUI_names = [
+                "#AliceMaryHiggins", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn"
+            ]
+
+            # Fine Gael Members
+            Fine_Gael_Members = [
+                "#JerryButtimer", "#JohnCummins", "#JoeOReilly", "#NealeRichmond"
+            ]
+
+            # Fianna Fáil Members
+            Fianna_Fáil_Members = [
+                "#PatCasey", "#NedOSullivan", "#TerryLeyden", "#JenniferMurnaneOConnor"
+            ]   
+
+            # Labour Party Members
+            Labour_Members = [
+                "#PaulGavan", "#MarieSherlock", "#GedNash", "#MáireDevine"
+            ]
+
+            # Sinn Féin Members
+            Sinn_Féin_Members = [
+                "#ChrisAndrews"
+            ]
+
+            # Independent Members
+            Independent_Members = [
+                "#GerardPCraughwell", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn", "#AliceMaryHiggins"
+            ]
+
 def run_statistical_tests(labour, nui):
     print("\n=== Mann-Whitney U Test Results ===")
 
@@ -28,15 +68,6 @@ def run_statistical_tests(labour, nui):
             print("→ Significant difference between Labour and NUI panels.")
         else:
             print("→ No significant difference between Labour and NUI panels.")
-
-
-def get_age(date_of_birth, date_of_debate):
-    if '.' in date_of_birth:
-        date_of_birth = date_of_birth.split('.')[-1]
-    birth_date = datetime.strptime(date_of_birth, "%Y-%m-%d")
-    debate_date = datetime.strptime(date_of_debate, "%Y-%m-%d")
-    age = debate_date.year - birth_date.year - ((debate_date.month, debate_date.day) < (birth_date.month, birth_date.day))
-    return age
 
 
 def get_panel_members(panel_name, date_start):
@@ -141,47 +172,6 @@ def parse_debate_XML(url, panel_members=None):
         for speech in speeches:
             # Get speaker details
             speaker_info = get_speaker_details(speech, panel_members)
-            
-
-            # PIDs of Labour Panel
-            Labour_names = [
-                "#JerryButtimer", "#PatCasey", "#ShaneCassells", "#GerardPCraughwell",
-                "#JohnCummins", "#RobbieGallagher", "#PaulGavan", "#JoeOReilly",
-                "#PaulineOReilly", "#NedOSullivan", "#MarieSherlock", "#ChrisAndrews",
-                "#NessaCosgrove", "#MarkDuffy", "#MikeKennelly", "#MariaMcCormack",
-                "#MargaretMurphyOMahony", "#PatriciaStephenson", "#MáireDevine",
-                "#TerryLeyden", "#JenniferMurnaneOConnor", "#GedNash", "#NealeRichmond",
-                
-            ]
-            # PIDs of NUI panel
-            NUI_names = [
-                "#AliceMaryHiggins", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn"
-            ]
-
-            # Fine Gael Members
-            Fine_Gael_Members = [
-                "#JerryButtimer", "#JohnCummins", "#JoeOReilly", "#NealeRichmond"
-            ]
-
-            # Fianna Fáil Members
-            Fianna_Fáil_Members = [
-                "#PatCasey", "#NedOSullivan", "#TerryLeyden", "#JenniferMurnaneOConnor"
-            ]   
-
-            # Labour Party Members
-            Labour_Members = [
-                "#PaulGavan", "#MarieSherlock", "#GedNash", "#MáireDevine"
-            ]
-
-            # Sinn Féin Members
-            Sinn_Féin_Members = [
-                "#ChrisAndrews"
-            ]
-
-            # Independent Members
-            Independent_Members = [
-                "#GerardPCraughwell", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn", "#AliceMaryHiggins"
-            ]
 
 
             accepted_houses = ["24", "25", "26"]
