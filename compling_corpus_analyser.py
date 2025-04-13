@@ -3,9 +3,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 import spacy
 import statistics as st
+import math
+from scipy.stats import mannwhitneyu
 
 df = pd.read_excel("Corpus.xlsx")
 nlp = spacy.load('en_core_web_sm')
+
+def run_statistical_tests(labour, nui):
+    print("\n=== Mann-Whitney U Test Results ===")
+
+    metrics = {
+        "MATTR": (labour.MATTR, nui.MATTR),
+        "AWF": (labour.AWF, nui.AWF),
+        "CTUR": (labour.CTUR, nui.CTUR),
+        "MLT": (labour.MLT, nui.MLT)
+    }
+
+    for metric_name, (labour_data, nui_data) in metrics.items():
+        u_stat, p_value = mannwhitneyu(labour_data, nui_data, alternative='two-sided')
+
+        print(f"\nMetric: {metric_name}")
+        print(f"  U statistic = {u_stat:.2f}")
+        print(f"  p-value     = {p_value:.4f}")
+        
+        if p_value < 0.05:
+            print("  → Significant difference between Labour and NUI panels.")
+        else:
+            print("  → No significant difference between Labour and NUI panels.")
 
 class Panel:
     
@@ -14,12 +38,11 @@ class Panel:
         self.panel_name = name
         self.contributions = []
         # Metrics   (Lexical)
-        self.TTR = []                    # diversity
-        self.word_length = []            # sophistication
+        self.MATTR = []       
+        self.AWF = [] 
         # Metrics   (Structural)
-        self.complex_tunit_ratio = []    # complexity
-        self.sentence_length = []        # extent
-
+        self.CTUR = [] 
+        self.MLT = []
 
     
     # Functions
@@ -27,48 +50,52 @@ class Panel:
         doc = nlp(contribution)
         return [sent.text.strip() for sent in doc.sents]
     
-    def getTTR (self, sent):
-        words = sent.split()
-        unique = []
-        for word in words:
-            if word not in unique:
-                unique.append(word)
-            
-        return (len(unique) / len(words)) if words else 0
     
-    def getWL(self, sent):
-        word_lengths = []
-        words = sent.split(' ')
-        for word in words:
-            if len(word) > 0:
-                word_lengths.append(len(word))
-            if len(word) > 17:
-                print (word)
-        return word_lengths
+    def getMATTR (self, text, window_size):
+        words = text.split()
+        if len(words) < window_size:
+            return len(set(words)) / len(words) if words else 0
+
+        ttrs = []
+        for i in range(len(words) - window_size + 1):
+            window = words[i:i + window_size]
+            ttr = len(set(window)) / window_size
+            ttrs.append(ttr)
+
+        return sum(ttrs) / len(ttrs)
     
-    def getCTUR(self, sents):
+    def getAWF(self, text, freq_dict):
+        words = text.lower().split()
+        freqs = [math.log10(freq_dict.get(word, 1) + 1) for word in words]
+        return sum(freqs) / len(freqs) if freqs else 0
+    
+    def getCTUR(self, text):
         subordinate_labels = {'advcl', 'csubj', 'ccomp', 'relcl', 'xcomp'}
         total_main_clauses = 0
         total_subordinate_clauses = 0
-    
-        for sent in sents:
-            doc = nlp(sent)
+        doc = nlp(text)
         
-            # Count main clauses by tokens labeled 'ROOT' (one for each independent clause).
-            main_clauses = sum(1 for token in doc if token.dep_ == "ROOT")
-        
-            # Count subordinate clauses by tokens with labels often used for subordination.
-            sub_clauses = sum(1 for token in doc if token.dep_ in subordinate_labels)
-        
-            total_main_clauses += main_clauses
-            total_subordinate_clauses += sub_clauses
-    
-        # Avoid division by zero if no main clauses found.
+        for sent in doc.sents:
+            total_main_clauses += sum(1 for token in sent if token.dep_ == "ROOT")
+            total_subordinate_clauses += sum(1 for token in sent if token.dep_ in subordinate_labels)
+
         if total_main_clauses == 0:
             return 0.0
-    
-        ratio = (total_subordinate_clauses + total_main_clauses) / total_main_clauses
-        return ratio
+
+        return (total_main_clauses + total_subordinate_clauses) / total_main_clauses
+
+    def getMLT(self, text):
+        doc = nlp(text)
+        t_units = []
+
+        for sent in doc.sents:
+            # Split sentence into coordinated main clauses (T-units)
+            clauses = [token for token in sent if token.dep_ == "ROOT"]
+            if clauses:
+                t_units.append(len(sent.text.split()))  # Word count per T-unit
+
+        return np.mean(t_units) if t_units else 0
+
 
     def preprocess_text(self, text):
         # Replace newlines with a period and a space
@@ -76,63 +103,53 @@ class Panel:
     
     def complexityAnalysis(self):
         counter = 0
+        df = pd.read_csv("C:/Users/Adam/Desktop/College/Trinity/Year_4/Comp Ling/Final Task/all.txt", sep='\s+', header=None, names=["frequency", "word", "pos", "unknown"])
+        bnc_freq_dict = dict(zip(df["word"], df["frequency"]))
         for contrib in self.contributions:
             contrib = self.preprocess_text(contrib)
             counter += 1
-            # print("\033[2J\033[H", end="")
-            # print(round(counter / len(self.contributions) * 100), "%")
-            sentences = self.sentParser(contrib)
-            # Debug print: show sentences with their lengths
-            for sent in sentences:
-                word_count = len(sent.split())
-                if word_count < 110:
-                    # Then process TTR, WL, etc.
-                    ttr_val = self.getTTR(contrib)
-                    self.TTR.append(ttr_val)
+            print("\033[2J\033[H", end="")
+            print(round(counter / len(self.contributions) * 100), "%")
             
-                    WL = self.getWL(sent)
-                    self.word_length.extend(WL)
-                    if(word_count > 0):
-                        self.sentence_length.append(word_count) 
-            
-            # CTUR
-            CTUR = self.getCTUR(self.sentParser(contrib))
-            self.complex_tunit_ratio.append(CTUR)
+            self.MATTR.append(self.getMATTR(contrib, 50))
+            self.AWF.append(self.getAWF(contrib, bnc_freq_dict))
+            self.CTUR.append(self.getCTUR(contrib))
+            self.MLT.append(self.getMLT(contrib))
     
 def exportGraph(panel):
-    rows = ["TTR", "WL", "CTUR", "SL"]
+    rows = ["MATTR", "AWF", "CTUR", "MTL"]
     columns = ["Minimum", "Maximum", "Median", "Mean", "Standard Deviation"]
     
     data = {
         "Minimum": [
-            round(min(panel.TTR), 3), 
-            min(panel.word_length), 
-            round(min(panel.complex_tunit_ratio), 3), 
-            min(panel.sentence_length)
+            round(min(panel.MATTR), 3), 
+            round(min(panel.AWF),3), 
+            round(min(panel.CTUR), 3), 
+            round(min(panel.MLT),3)
         ],
         "Maximum": [
-            round(max(panel.TTR), 3), 
-            max(panel.word_length), 
-            round(max(panel.complex_tunit_ratio), 3), 
-            max(panel.sentence_length)
+            round(max(panel.MATTR), 3), 
+            round(max(panel.AWF),3), 
+            round(max(panel.CTUR), 3), 
+            round(max(panel.MLT),3)
         ],
         "Median": [
-            round(st.median(panel.TTR), 3), 
-            st.median(panel.word_length), 
-            round(st.median(panel.complex_tunit_ratio), 3), 
-            st.median(panel.sentence_length)
+            round(st.median(panel.MATTR), 3), 
+            round(st.median(panel.AWF),3), 
+            round(st.median(panel.CTUR), 3), 
+            round(st.median(panel.MLT),3)
         ],
         "Mean": [
-            round(st.mean(panel.TTR), 3), 
-            round(st.mean(panel.word_length),3), 
-            round(st.mean(panel.complex_tunit_ratio), 3), 
-            round(st.mean(panel.sentence_length),3)
+            round(st.mean(panel.MATTR), 3), 
+            round(st.mean(panel.AWF),3), 
+            round(st.mean(panel.CTUR), 3), 
+            round(st.mean(panel.MLT),3)
         ],
         "Standard Deviation": [
-            round(st.stdev(panel.TTR), 3), 
-            round(st.stdev(panel.word_length),3), 
-            round(st.stdev(panel.complex_tunit_ratio), 3), 
-            round(st.stdev(panel.sentence_length),3)
+            round(st.stdev(panel.MATTR), 3), 
+            round(st.stdev(panel.AWF),3), 
+            round(st.stdev(panel.CTUR), 3), 
+            round(st.stdev(panel.MLT),3)
         ]
     }
     data_frame = pd.DataFrame(data,index=rows)
@@ -176,3 +193,6 @@ if __name__ == '__main__':
     # 3. DATA GRAPHING
     exportGraph(labour)
     exportGraph(nui)
+    
+    # 4. STATISTICAL TESTING
+    run_statistical_tests(labour, nui)
