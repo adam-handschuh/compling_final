@@ -8,45 +8,31 @@ import argparse
 
 from scipy.stats import mannwhitneyu
 
-            # PIDs of Labour Panel
-            Labour_names = [
-                "#JerryButtimer", "#PatCasey", "#ShaneCassells", "#GerardPCraughwell",
-                "#JohnCummins", "#RobbieGallagher", "#PaulGavan", "#JoeOReilly",
-                "#PaulineOReilly", "#NedOSullivan", "#MarieSherlock", "#ChrisAndrews",
-                "#NessaCosgrove", "#MarkDuffy", "#MikeKennelly", "#MariaMcCormack",
-                "#MargaretMurphyOMahony", "#PatriciaStephenson", "#MáireDevine",
-                "#TerryLeyden", "#JenniferMurnaneOConnor", "#GedNash", "#NealeRichmond",
-                
-            ]
-            # PIDs of NUI panel
-            NUI_names = [
-                "#AliceMaryHiggins", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn"
-            ]
+# PIDs of Labour Panel
+Labour_names = [
+            "#JerryButtimer", "#PatCasey", "#ShaneCassells", "#GerardPCraughwell",
+            "#JohnCummins", "#RobbieGallagher", "#PaulGavan", "#JoeOReilly",
+            "#PaulineOReilly", "#NedOSullivan", "#MarieSherlock", "#ChrisAndrews",
+            "#NessaCosgrove", "#MarkDuffy", "#MikeKennelly", "#MariaMcCormack",
+            "#MargaretMurphyOMahony", "#PatriciaStephenson", "#MáireDevine",
+            "#TerryLeyden", "#JenniferMurnaneOConnor", "#GedNash", "#NealeRichmond"]
+# PIDs of NUI panel
+NUI_names = ["#AliceMaryHiggins", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn"]
 
-            # Fine Gael Members
-            Fine_Gael_Members = [
-                "#JerryButtimer", "#JohnCummins", "#JoeOReilly", "#NealeRichmond"
-            ]
+# Fine Gael Members
+Fine_Gael_Members = ["#JerryButtimer", "#JohnCummins", "#JoeOReilly", "#NealeRichmond"]
 
-            # Fianna Fáil Members
-            Fianna_Fáil_Members = [
-                "#PatCasey", "#NedOSullivan", "#TerryLeyden", "#JenniferMurnaneOConnor"
-            ]   
+# Fianna Fáil Members
+Fianna_Fáil_Members = ["#PatCasey", "#NedOSullivan", "#TerryLeyden", "#JenniferMurnaneOConnor"]   
 
-            # Labour Party Members
-            Labour_Members = [
-                "#PaulGavan", "#MarieSherlock", "#GedNash", "#MáireDevine"
-            ]
+# Labour Party Members
+Labour_Members = ["#PaulGavan", "#MarieSherlock", "#GedNash", "#MáireDevine"]
 
-            # Sinn Féin Members
-            Sinn_Féin_Members = [
-                "#ChrisAndrews"
-            ]
+# Sinn Féin Members
+Sinn_Féin_Members = ["#ChrisAndrews"]
 
-            # Independent Members
-            Independent_Members = [
-                "#GerardPCraughwell", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn", "#AliceMaryHiggins"
-            ]
+# Independent Members
+Independent_Members = ["#GerardPCraughwell", "#MichaelMcDowell", "#RónánMullen", "#JohnCrown", "#FeargalQuinn", "#AliceMaryHiggins"]
 
 def run_statistical_tests(labour, nui):
     print("\n=== Mann-Whitney U Test Results ===")
