@@ -1,10 +1,10 @@
-from xml.dom import minidom
-import pandas as pd
-from pathlib import Path
-import requests
-import argparse
 import os
 from datetime import datetime
+import requests
+import pandas as pd
+from pathlib import Path
+from xml.dom import minidom
+import argparse
 
 from scipy.stats import mannwhitneyu
 
